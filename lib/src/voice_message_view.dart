@@ -4,7 +4,8 @@ import 'package:voice_message_package/src/helpers/utils.dart';
 import 'package:voice_message_package/src/voice_controller.dart';
 import 'package:voice_message_package/src/widgets/noises.dart';
 import 'package:voice_message_package/src/widgets/play_pause_button.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:chat_go_app/utils/font_manager.dart';
 /// A widget that displays a voice message view with play/pause functionality.
 ///
 /// The [VoiceMessageView] widget is used to display a voice message with customizable appearance and behavior.
@@ -15,12 +16,14 @@ class VoiceMessageView extends StatelessWidget {
   const VoiceMessageView(
       {Key? key,
       required this.controller,
+        this.time,
+        this.iconPath,
       this.backgroundColor = Colors.white,
       this.activeSliderColor = Colors.red,
       this.notActiveSliderColor,
       this.circlesColor = Colors.red,
-      this.innerPadding = 12,
-      this.cornerRadius = 20,
+      this.innerPadding = 10,
+      this.cornerRadius = 10,
       // this.playerWidth = 170,
       this.size = 38,
       this.refreshIcon = const Icon(
@@ -52,6 +55,9 @@ class VoiceMessageView extends StatelessWidget {
       this.playPauseButtonLoadingColor = Colors.white})
       : super(key: key);
 
+  // for getting the time of voice note
+  final String? time;
+  final String? iconPath;
   /// The controller for the voice message view.
   final VoiceController controller;
 
@@ -126,47 +132,73 @@ class VoiceMessageView extends StatelessWidget {
         /// update ui when change play status
         valueListenable: controller.updater,
         builder: (context, value, child) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// play pause button
-              PlayPauseButton(
-                controller: controller,
-                color: color,
-                loadingColor: playPauseButtonLoadingColor,
-                size: size,
-                refreshIcon: refreshIcon,
-                pauseIcon: pauseIcon,
-                playIcon: playIcon,
-                stopDownloadingIcon: stopDownloadingIcon,
-                buttonDecoration: playPauseButtonDecoration,
+          return Stack(
+            alignment: Alignment.center,
+            children : [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /// play pause button
+                  PlayPauseButton(
+                    controller: controller,
+                    color: color,
+                    loadingColor: playPauseButtonLoadingColor,
+                    size: size,
+                    refreshIcon: refreshIcon,
+                    pauseIcon: pauseIcon,
+                    playIcon: playIcon,
+                    stopDownloadingIcon: stopDownloadingIcon,
+                    buttonDecoration: playPauseButtonDecoration,
+                  ),
+
+                  ///
+                  const SizedBox(width: 10),
+
+                  /// slider & noises
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        _noises(newTHeme),
+                        const SizedBox(height: 4),
+                        Text(controller.remindingTime, style: counterTextStyle),
+                      ],
+                    ),
+                  ),
+
+                  ///
+                  const SizedBox(width: 12),
+
+                  /// speed button
+                  _changeSpeedButton(color),
+
+                  ///
+                  const SizedBox(width: 10),
+                ],
               ),
-
-              ///
-              const SizedBox(width: 10),
-
-              /// slider & noises
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+             time!=null? Positioned(
+                  bottom: 0,
+                  right: 10,
+                  child: Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 8),
-                    _noises(newTHeme),
-                    const SizedBox(height: 4),
-                    Text(controller.remindingTime, style: counterTextStyle),
+                    Text("${time}",style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xffA0A4AB),
+                        fontSize: 10
+                    )),
+                    iconPath!=null?SizedBox(width: 3,):Container(),
+                    iconPath!=null?Container(child: Center(
+                      child: SvgPicture.asset("${iconPath}"),
+                    ),):Container(),
                   ],
                 ),
-              ),
-
-              ///
-              const SizedBox(width: 12),
-
-              /// speed button
-              _changeSpeedButton(color),
-
-              ///
-              const SizedBox(width: 10),
-            ],
+              )):Container()
+            ]
           );
         },
       ),
